@@ -1,6 +1,9 @@
-#   Description:
-# This script removes unwanted Apps that come with Windows. If you  do not want
-# to remove certain Apps comment out the corresponding lines below.
+<#
+.Description
+  This script removes unwanted Apps that come with Windows. If you do not want
+  to remove certain Apps, make sure a suitable wildcard string is included in
+  the whitelist.
+#>
 
 # Import-Module -DisableNameChecking $PSScriptRoot\..\lib\take-own.psm1
 # Import-Module -DisableNameChecking $PSScriptRoot\..\lib\New-FolderForced.psm1
