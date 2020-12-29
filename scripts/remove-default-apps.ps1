@@ -8,150 +8,42 @@ Import-Module -DisableNameChecking $PSScriptRoot\..\lib\New-FolderForced.psm1
 Write-Output "Elevating privileges for this process"
 do {} until (Elevate-Privileges SeTakeOwnershipPrivilege)
 
-function Remove-WindowsApps {
+$packages = Get-AppxProvisionedPackage -Online | Select Packagename
+$whitelist = @(
+    "*MicrosoftEdge*", "*WindowsCalculator*", "*MSPaint*",
+    "*WindowsStore*", # Cannot re-install
+    "*Microsoft.VCLibs.*"
+)
 
-    $apps = @(
-        # default Windows 10 apps
-        "Microsoft.3DBuilder"
-        "Microsoft.Appconnector"
-        "Microsoft.BingFinance"
-        "Microsoft.BingNews"
-        "Microsoft.BingSports"
-        "Microsoft.BingTranslator"
-        "Microsoft.BingWeather"
-        "Microsoft.FreshPaint"
-        "Microsoft.GamingServices"
-        "Microsoft.Microsoft3DViewer"
-        "Microsoft.MicrosoftOfficeHub"
-        "Microsoft.MicrosoftPowerBIForWindows"
-        "Microsoft.MicrosoftSolitaireCollection"
-        "Microsoft.MicrosoftStickyNotes"
-        "Microsoft.MinecraftUWP"
-        "Microsoft.NetworkSpeedTest"
-        "Microsoft.Office.OneNote"
-        "Microsoft.People"
-        "Microsoft.Print3D"
-        "Microsoft.SkypeApp"
-        "Microsoft.Wallet"
-        "Microsoft.Windows.Photos"
-        "Microsoft.WindowsAlarms"
-        "Microsoft.WindowsCalculator"
-        "Microsoft.WindowsCamera"
-        "microsoft.windowscommunicationsapps"
-        "Microsoft.WindowsMaps"
-        "Microsoft.WindowsPhone"
-        "Microsoft.WindowsSoundRecorder"
-        "Microsoft.MicrosoftStickyNotes"
-        #"Microsoft.WindowsStore"   # can't be re-installed
-        "Microsoft.Xbox.TCUI"
-        "Microsoft.XboxApp"
-        "Microsoft.XboxGameOverlay"
-        "Microsoft.XboxGamingOverlay"
-        "Microsoft.XboxSpeechToTextOverlay"
-        "Microsoft.YourPhone"
-        "Microsoft.ZuneMusic"
-        "Microsoft.ZuneVideo"
+foreach ($app in $packages) {
+    $matched = $false
+    foreach ($w in $whitelist) {
+        if ($app.packagename -like $w) {
+            $matched = $true
+            break
+        }
+    }
 
-        # Threshold 2 apps
-        "Microsoft.CommsPhone"
-        "Microsoft.ConnectivityStore"
-        "Microsoft.GetHelp"
-        "Microsoft.Getstarted"
-        "Microsoft.Messaging"
-        "Microsoft.Office.Sway"
-        "Microsoft.OneConnect"
-        "Microsoft.WindowsFeedbackHub"
+    if ($matched -eq $false) {
+        write-host "Uninstalling" $app.packagename
+        $tries = 0
 
-        # Creators Update apps
-        "Microsoft.Microsoft3DViewer"
-        "Microsoft.MSPaint"
+        do {
+            Get-AppxPackage -Name $app.packagename -AllUsers |
+                Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
+            Get-AppxProvisionedPackage -Online |
+                where {$_.packagename -EQ $app.packagename} |
+                Remove-AppxProvisionedPackage -AllUsers -Online -ErrorAction SilentlyContinue
+            $tries++
+        } while ((Get-AppxProvisionedPackage -Online | Select Packagename) -match $app.packagename -or $tries -ge 2)
 
-        #Redstone apps
-        "Microsoft.BingFoodAndDrink"
-        "Microsoft.BingHealthAndFitness"
-        "Microsoft.BingTravel"
-        "Microsoft.WindowsReadingList"
-
-        # Redstone 5 apps
-        "Microsoft.MixedReality.Portal"
-        "Microsoft.ScreenSketch"
-        "Microsoft.XboxGamingOverlay"
-        "Microsoft.YourPhone"
-
-        # non-Microsoft
-        "2FE3CB00.PicsArt-PhotoStudio"
-        "46928bounde.EclipseManager"
-        "4DF9E0F8.Netflix"
-        "613EBCEA.PolarrPhotoEditorAcademicEdition"
-        "6Wunderkinder.Wunderlist"
-        "7EE7776C.LinkedInforWindows"
-        "89006A2E.AutodeskSketchBook"
-        "9E2F88E3.Twitter"
-        "A278AB0D.DisneyMagicKingdoms"
-        "A278AB0D.MarchofEmpires"
-        "*.AdobePhotoshopExpress"
-        "ActiproSoftwareLLC.562882FEEB491" # next one is for the Code Writer from Actipro Software LLC
-        "CAF9E577.Plex"  
-        "ClearChannelRadioDigital.iHeartRadio"
-        "D52A8D61.FarmVille2CountryEscape"
-        "D5EA27B7.Duolingo-LearnLanguagesforFree"
-        "DB6EA5DB.CyberLinkMediaSuiteEssentials"
-        "*Dell"
-        "DolbyLaboratories.DolbyAccess"
-        "DolbyLaboratories.DolbyAccess"
-        "Drawboard.DrawboardPDF"
-        "Facebook.Facebook"
-        "Fitbit.FitbitCoach"
-        "flaregamesGmbH.RoyalRevolt2"
-        "Flipboard.Flipboard"
-        "king.com.*"
-        "king.com.BubbleWitch3Saga"
-        "king.com.CandyCrushSaga"
-        "king.com.CandyCrushSodaSaga"
-        "G5*"
-        "GAMELOFTSA.Asphalt8Airborne"
-        "KeeperSecurityInc.Keeper"
-        "NORDCURRENT.COOKINGFEVER"
-        "PandoraMediaInc.29680B314EFC2"
-        "Playtika.CaesarsSlotsFreeCasino"
-        "ShazamEntertainmentLtd.Shazam"
-        "SlingTVLLC.SlingTV"
-        "SpotifyAB.SpotifyMusic"
-        "TheNewYorkTimes.NYTCrossword"
-        "ThumbmunkeysLtd.PhototasticCollage"
-        "TuneIn.TuneInRadio"
-        "WinZipComputing.WinZipUniversal"
-        "XINGAG.XING"
-
-        # apps which cannot be removed using Remove-AppxPackage
-        #"Microsoft.BioEnrollment"
-        #"Microsoft.MicrosoftEdge"
-        #"Microsoft.Windows.Cortana"
-        #"Microsoft.WindowsFeedback"
-        #"Microsoft.XboxGameCallableUI"
-        #"Microsoft.XboxIdentityProvider"
-        #"Windows.ContactSupport"
-
-        # apps which other apps depend on
-        "Microsoft.Advertising.Xaml"
-    )
-
-    foreach ($app in $apps) {
-        Write-Output "Trying to remove $app"
-
-        Get-AppxPackage -Name $app -AllUsers |
-            Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue
-
-        Get-AppXProvisionedPackage -Online |
-            Where-Object DisplayName -EQ $app |
-            Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+        if ((Get-AppxProvisionedPackage -Online | Select Packagename) -match $app.packagename) {
+            write-host $app.packagename "failed to uninstall after $tries tries"
+        } else {
+            write-host $app.packagename "successfully uninstalled after $tries tries"
+        }
     }
 }
-
-Write-Output "Uninstalling default apps (1st pass)"
-Remove-WindowsApps
-Write-Output "Uninstalling default apps (2nd pass)"
-Remove-WindowsApps
 
 # Prevents Apps from re-installing
 $cdm = @(
