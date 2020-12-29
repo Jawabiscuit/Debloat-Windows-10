@@ -34,12 +34,13 @@ $apps = @(
     "Microsoft.Wallet"
     "Microsoft.Windows.Photos"
     "Microsoft.WindowsAlarms"
-    #"Microsoft.WindowsCalculator"
+    "Microsoft.WindowsCalculator"
     "Microsoft.WindowsCamera"
     "microsoft.windowscommunicationsapps"
     "Microsoft.WindowsMaps"
     "Microsoft.WindowsPhone"
     "Microsoft.WindowsSoundRecorder"
+    "Microsoft.MicrosoftStickyNotes"
     #"Microsoft.WindowsStore"   # can't be re-installed
     "Microsoft.Xbox.TCUI"
     "Microsoft.XboxApp"
@@ -62,7 +63,7 @@ $apps = @(
 
     # Creators Update apps
     "Microsoft.Microsoft3DViewer"
-    #"Microsoft.MSPaint"
+    "Microsoft.MSPaint"
 
     #Redstone apps
     "Microsoft.BingFoodAndDrink"
@@ -87,18 +88,26 @@ $apps = @(
     "9E2F88E3.Twitter"
     "A278AB0D.DisneyMagicKingdoms"
     "A278AB0D.MarchofEmpires"
+    "*.AdobePhotoshopExpress"
     "ActiproSoftwareLLC.562882FEEB491" # next one is for the Code Writer from Actipro Software LLC
     "CAF9E577.Plex"  
     "ClearChannelRadioDigital.iHeartRadio"
     "D52A8D61.FarmVille2CountryEscape"
     "D5EA27B7.Duolingo-LearnLanguagesforFree"
     "DB6EA5DB.CyberLinkMediaSuiteEssentials"
+    "*Dell"
     "DolbyLaboratories.DolbyAccess"
     "DolbyLaboratories.DolbyAccess"
     "Drawboard.DrawboardPDF"
     "Facebook.Facebook"
     "Fitbit.FitbitCoach"
+    "flaregamesGmbH.RoyalRevolt2"
     "Flipboard.Flipboard"
+    "king.com.*"
+    "king.com.BubbleWitch3Saga"
+    "king.com.CandyCrushSaga"
+    "king.com.CandyCrushSodaSaga"
+    "G5*"
     "GAMELOFTSA.Asphalt8Airborne"
     "KeeperSecurityInc.Keeper"
     "NORDCURRENT.COOKINGFEVER"
@@ -112,11 +121,6 @@ $apps = @(
     "TuneIn.TuneInRadio"
     "WinZipComputing.WinZipUniversal"
     "XINGAG.XING"
-    "flaregamesGmbH.RoyalRevolt2"
-    "king.com.*"
-    "king.com.BubbleWitch3Saga"
-    "king.com.CandyCrushSaga"
-    "king.com.CandyCrushSodaSaga"
 
     # apps which cannot be removed using Remove-AppxPackage
     #"Microsoft.BioEnrollment"
