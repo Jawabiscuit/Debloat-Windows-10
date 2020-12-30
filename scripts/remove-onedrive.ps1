@@ -55,19 +55,10 @@ Write-Output "Restarting explorer"
 Start-Process "explorer.exe"
 
 Write-Output "Waiting for explorer to complete loading"
-Start-Sleep 10
+Start-Sleep 3
 
-$Caught = @()
 Write-Output "Removing additional OneDrive leftovers"
 foreach ($item in (Get-ChildItem "$env:WinDir\WinSxS\*onedrive*")) {
     Takeown-Folder $item.FullName
-    try {
-        Remove-Item -Recurse -Force $item.FullName
-    } catch {
-        $Caught += $item
-    }
-}
-if ($Caught) {
-   Write-Output "Windows has prevented deleting these leftovers"
-   foreach ($C in $Caught) { Write-Output $C }
+    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $item.FullName
 }
