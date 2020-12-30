@@ -22,9 +22,10 @@ Write-Output "Removing OneDrive leftovers"
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:localappdata\Microsoft\OneDrive"
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:programdata\Microsoft OneDrive"
 Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:systemdrive\OneDriveTemp"
-# check if directory is empty before removing:
-If ((Get-ChildItem "$env:userprofile\OneDrive" -Recurse | Measure-Object).Count -eq 0) {
-    Remove-Item -Recurse -Force -ErrorAction SilentlyContinue "$env:userprofile\OneDrive"
+$OneDriveFolder = "$env:USERPROFILE\OneDrive"
+if (Test-Path $OneDriveFolder) {
+    Takeown-Folder $OneDriveFolder
+    Remove-Item -Recurse -Force $OneDriveFolder
 }
 
 Write-Output "Disable OneDrive via Group Policies"
@@ -62,10 +63,3 @@ foreach ($item in (Get-ChildItem "$env:WinDir\WinSxS\*onedrive*")) {
     Takeown-Folder $item.FullName
     Remove-Item -Recurse -Force -ErrorAction SilentlyContinue $item.FullName
 }
-
-$OneDriveFolder = "$env:USERPROFILE\OneDrive"
-if (Test-Path $OneDriveFolder) {
-    Takeown-Folder $OneDriveFolder
-    Remove-Item -Recurse -Force $OneDriveFolder
-}
-
