@@ -65,7 +65,7 @@ foreach ($item in (Get-ChildItem "$env:WinDir\WinSxS\*onedrive*")) {
 
 $OneDriveFolder = "$env:USERPROFILE\OneDrive"
 if (Test-Path $OneDriveFolder) {
-    Takeown-Folder $OneDriveFolder.FullName
+    Takeown-Folder $OneDriveFolder
     Remove-Item -Recurse $OneDriveFolder
 }
 
