@@ -28,7 +28,7 @@ foreach ($app in $packages) {
     }
 
     if ($matched -eq $false) {
-        write-host "Uninstalling" $app.packagename
+        Write-Output "Uninstalling" $app.packagename
         $tries = 0
 
         do {
@@ -41,12 +41,14 @@ foreach ($app in $packages) {
         } while ((Get-AppxProvisionedPackage -Online | Select Packagename) -match $app.packagename -or $tries -ge 2)
 
         if ((Get-AppxProvisionedPackage -Online | Select Packagename) -match $app.packagename) {
-            write-host $app.packagename "failed to uninstall after $tries tries"
+            Write-Output $app.packagename "failed to uninstall after $tries tries"
         } else {
-            write-host $app.packagename "successfully uninstalled after $tries tries"
+            Write-Output $app.packagename "successfully uninstalled after $tries tries"
         }
     }
 }
+
+Write-Output "Finished uninstalling"
 
 # Prevents Apps from re-installing
 $cdm = @(
